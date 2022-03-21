@@ -23,15 +23,17 @@ const server = http.createServer(app);
 
 const wss = new WebSocketServer({ server });
 
+const sockets = [];
+
 wss.on("connection", (socket) => {
+  sockets.push(socket);
   console.log("✅ Connected to Browser");
   socket.on("close", () => {
     console.log("❌ Disconnected from Browser");
   });
   socket.on("message", (message) => {
-    console.log(message.toString("utf8"));
+    sockets.forEach((socket) => socket.send(message.toString("utf8")));
   });
-  socket.send("hello");
 });
 
 server.listen(PORT, handleListening);
