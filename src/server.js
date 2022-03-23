@@ -1,6 +1,7 @@
 import express from "express";
+import SocketIO from "socket.io";
 import http from "http";
-import WebSocket, { WebSocketServer } from "ws";
+// import WebSocket, { WebSocketServer } from "ws";
 
 const PORT = 3000;
 
@@ -19,32 +20,37 @@ const handleListening = () => {
 
 // app.listen(PORT, handleListening);
 
-const server = http.createServer(app);
+const httpServer = http.createServer(app);
+const wsServer = SocketIO(httpServer);
 
-const wss = new WebSocketServer({ server });
+wsServer.on("connection", (socket) => {
+  console.log(socket);
+});
+
+// const wss = new WebSocketServer({ server });
 
 const sockets = [];
 
-wss.on("connection", (socket) => {
-  sockets.push(socket);
-  socket["nickname"] = "Anonymous";
-  console.log("✅ Connected to Browser");
-  socket.on("close", () => {
-    console.log("❌ Disconnected from Browser");
-  });
-  socket.on("message", (msg) => {
-    const message = JSON.parse(msg);
-    switch (message.type) {
-      case "new_message":
-        sockets.forEach((socket) =>
-          socket.send(`${socket.nickname}: ${message.payload}`)
-        );
-        break;
-      case "nickname":
-        socket["nickname"] = message.payload;
-        break;
-    }
-  });
-});
+// wss.on("connection", (socket) => {
+//   sockets.push(socket);
+//   socket["nickname"] = "Anonymous";
+//   console.log("✅ Connected to Browser");
+//   socket.on("close", () => {
+//     console.log("❌ Disconnected from Browser");
+//   });
+//   socket.on("message", (msg) => {
+//     const message = JSON.parse(msg);
+//     switch (message.type) {
+//       case "new_message":
+//         sockets.forEach((socket) =>
+//           socket.send(`${socket.nickname}: ${message.payload}`)
+//         );
+//         break;
+//       case "nickname":
+//         socket["nickname"] = message.payload;
+//         break;
+//     }
+//   });
+// });
 
-server.listen(PORT, handleListening);
+httpServer.listen(PORT, handleListening);
