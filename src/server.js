@@ -23,6 +23,21 @@ const handleListening = () => {
 const httpServer = http.createServer(app);
 const wsServer = SocketIO(httpServer);
 
+function publicRooms() {
+  const {
+    sockets: {
+      adapter: { rooms, sids },
+    },
+  } = wsServer;
+  const publicRooms = [];
+  rooms.forEach((_, key) => {
+    if(sids.get(key) === undefined) {
+      publicRooms.push(key);
+    }
+  });
+  return publicRooms;
+}
+
 wsServer.on("connection", (socket) => {
   socket["nickname"] = "Anon";
   socket.onAny((event) => {
