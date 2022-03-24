@@ -16,8 +16,11 @@ html(lang="en")
           button Enter Room 
       div#room 
         h3
-        ul 
-        form(action="") 
+        ul
+        form(action="")#name
+          input(type="text", placeholder="nickname", required) 
+          button Change 
+        form(action="")#message
           input(type="text", placeholder="message", required) 
           button Send
 
