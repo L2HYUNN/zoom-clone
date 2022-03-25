@@ -123,21 +123,42 @@ socket.on("welcome", async () => {
 });
 
 socket.on("offer", async (offer) => {
+  console.log("received the offer");
   myPeerConnection.setRemoteDescription(offer);
   const answer = await myPeerConnection.createAnswer();
   myPeerConnection.setLocalDescription(answer);
   socket.emit("answer", answer, roomName);
+  console.log("sent the answer");
 });
 
 socket.on("answer", (answer) => {
+  console.log("received the answer");
   myPeerConnection.setRemoteDescription(answer);
+});
+
+socket.on("ice", (ice) => {
+  console.log("received Candidate");
+  myPeerConnection.addIceCandidate(ice);
 });
 
 //RTC Code
 
 function makeConnection() {
   myPeerConnection = new RTCPeerConnection();
+  myPeerConnection.addEventListener("icecandidate", handleIce);
+  myPeerConnection.addEventListener("track", handleAddStream);
   myStream.getTracks().forEach((track) => {
     myPeerConnection.addTrack(track, myStream);
   });
+}
+
+function handleIce(data) {
+  console.log("sent Candidate");
+  socket.emit("ice", data.candidate, roomName);
+}
+
+function handleAddStream(data) {
+  console.log("Stream Date", data);
+  const peerFace = document.getElementById("peerFace");
+  peerFace.srcObject = data.streams[0];
 }
